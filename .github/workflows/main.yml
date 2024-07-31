@@ -18,10 +18,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/nodejsimages:latest .
+        run: docker build -t mouazmalik123/nodejsimages:latest .
       
       - name: Publish image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/nodejsimages:latest
+        run: docker push mouazmalik123/nodejsimages:latest
 
   deploy:
     needs: build
