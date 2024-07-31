@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Pull image from Docker Hub
-        run: docker pull nodejsimages:latest
+        run: docker pull mouazmalik123/nodejsimages:latest
       
       - name: Delete old container
         run: |
