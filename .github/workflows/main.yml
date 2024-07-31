@@ -28,7 +28,7 @@ jobs:
         run: docker push mouazmalik123/nodejsimages:latest
         
       - name: Run Docker container
-        run: docker run -d -p 5000:5000 --name nodejs-app-container mouazmalik123/nodejsimages:latest
+        run: docker run -d -p 5000:5000 --name nodejs-app-container1 mouazmalik123/nodejsimages:latest
 
   # deploy:
   #   needs: build
