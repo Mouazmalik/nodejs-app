@@ -22,10 +22,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Build Docker image
-        run: docker build -t nodejsIMG .
+        run: docker build -t nodejsimages .
       
       - name: Publish image to Docker Hub
-        run: docker push nodejsIMG:latest
+        run: docker push nodejsimages:latest
 
   deploy:
     needs: build
@@ -38,7 +38,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Pull image from Docker Hub
-        run: docker pull nodejsIMG:latest
+        run: docker pull nodejsimages:latest
       
       - name: Delete old container
         run: |
@@ -47,4 +47,4 @@ jobs:
           fi
       
       - name: Run Docker container
-        run: docker run -d -p 5000:5000 --name nodejs-app-container nodejsIMG:latest
+        run: docker run -d -p 5000:5000 --name nodejs-app-container nodejsimages:latest
