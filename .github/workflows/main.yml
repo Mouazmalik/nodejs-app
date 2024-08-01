@@ -1,4 +1,4 @@
-name: Build and Deploy Node.js App
+name: Build and Deploy Node.js App1
 
 on:
   push:
@@ -14,7 +14,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get username
-        run: echo $USER
+        run: |
+          echo $USER
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -36,35 +37,22 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Create SSH directory and set up keys
-        run: |
-          set -x
-          mkdir -p ~/.ssh || exit 1
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/private_key.pem || exit 1
-          chmod 600 ~/.ssh/private_key.pem || exit 1
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts || exit 1
-        shell: /usr/bin/bash -e {0}
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          EC2_HOST: ${{ secrets.AWS_EC2_HOST }}
-
-      - name: Test SSH Connection
-        run: |
-          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} "echo 'SSH connection successful'"
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Deploy to AWS EC2
-        run: |
-          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
             docker pull mouazmalik123/nodejsimages:latest
-            docker stop nodejs-app-container || true
-            docker rm nodejs-app-container || true
+            if [ $(docker ps -q -f name=nodejs-app-container) ]; then
+              docker rm -f nodejs-app-container
+            fi
             docker run -d -p 5000:5000 --name nodejs-app-container mouazmalik123/nodejsimages:latest
-          EOF
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          EC2_HOST: ${{ secrets.AWS_EC2_HOST }} 
