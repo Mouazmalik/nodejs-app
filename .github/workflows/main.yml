@@ -56,11 +56,15 @@ jobs:
       - name: Test SSH Connection
         run: |
           ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} "echo 'SSH connection successful'"
-        
+
       - name: Deploy to AWS EC2
         run: |
-          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} "docker pull mouazmalik123/nodejsimages:latest"
-          if [ $(ssh -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} docker ps -q -f name=nodejs-app-container) ]; then
-            ssh -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} "docker rm -f nodejs-app-container"
-          fi
-          ssh -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} "docker run -d -p 5000:5000 --name nodejs-app-container mouazmalik123/nodejsimages:latest"
+          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            docker pull mouazmalik123/nodejsimages:latest
+            docker stop nodejs-app-container || true
+            docker rm nodejs-app-container || true
+            docker run -d -p 5000:5000 --name nodejs-app-container mouazmalik123/nodejsimages:latest
+          EOF
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          EC2_HOST: ${{ secrets.AWS_EC2_HOST }} 
