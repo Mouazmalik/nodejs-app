@@ -1,4 +1,4 @@
-name: Build and Deploy Node.js App1
+name: Build and Deploy Node.js App
 
 on:
   push:
@@ -24,10 +24,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t mouazmalik123/nodejsimages:latest .
+        run: docker build -t mouazmalik123/nodeimages1:latest .
 
       - name: Publish image to Docker Hub
-        run: docker push mouazmalik123/nodejsimages:latest
+        run: docker push mouazmalik123/nodeimages1:latest
 
   deploy:
     needs: build
@@ -46,13 +46,13 @@ jobs:
       - name: Deploy to AWS EC2
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ secrets.AWS_EC2_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            docker pull mouazmalik123/nodejsimages:latest
-            if [ $(docker ps -q -f name=nodejs-app-container) ]; then
-              docker rm -f nodejs-app-container
+            docker pull mouazmalik123/nodeimages1:latest
+            if [ $(docker ps -q -f name=node-container1) ]; then
+              docker rm -f node-container1
             fi
-            docker run -d -p 5000:5000 --name nodejs-app-container mouazmalik123/nodejsimages:latest
+            docker run -d -p 3000:3000 --name node-container1 mouazmalik123/nodeimages1:latest
